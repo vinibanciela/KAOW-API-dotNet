@@ -32,10 +32,12 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "KAOW.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Etapa final
-FROM base AS final
+# Etapa final com SDK (para permitir EF migrations e comandos)
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
 WORKDIR /app
+
+# Copiar a aplicação publicada
 COPY --from=publish /app/publish .
 
-# Comando de entrada
+# Comando de entrada padrão
 ENTRYPOINT ["dotnet", "KAOW.dll"]
