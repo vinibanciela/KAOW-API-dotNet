@@ -15,7 +15,6 @@ builder.Services.AddControllers(); // Adiciona suporte a Controllers
 var app = builder.Build();
 
 // Configuração do Swagger para desenvolvimento
-if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
