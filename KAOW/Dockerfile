@@ -24,8 +24,8 @@ RUN dotnet publish "KAOW.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseA
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
 WORKDIR /app
 
-# Copiar todo o projeto (inclui .csproj, .config, dotnet-tools.json)
-COPY ./ ./
+# Copiar a aplicação completa
+COPY . .
 
 # Restaurar ferramentas locais, incluindo dotnet-ef
 RUN dotnet tool restore
