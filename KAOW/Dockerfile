@@ -10,9 +10,17 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["KAOW.csproj", "./"]
-RUN dotnet restore "KAOW.csproj"
+
+# Copiar arquivos do projeto e dependências (inclui .csproj e .config)
 COPY . .
+
+# Restaurar ferramentas locais, incluindo dotnet-ef
+RUN dotnet tool restore
+
+# Restaurar pacotes
+RUN dotnet restore "KAOW.csproj"
+
+# Build do projeto
 RUN dotnet build "KAOW.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Etapa publish
@@ -21,14 +29,11 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "KAOW.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Etapa final (SDK + projeto completo para EF)
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
+FROM build AS final
 WORKDIR /app
 
-# Copiar a aplicação completa
+# Copiar todo o projeto (inclui binários, fontes e ferramentas locais)
 COPY . .
-
-# Restaurar ferramentas locais, incluindo dotnet-ef
-RUN dotnet tool restore
 
 # Comando padrão para executar a API
 ENTRYPOINT ["dotnet", "KAOW.dll"]
