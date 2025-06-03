@@ -1,0 +1,30 @@
+﻿version: '3.8'
+
+services:
+  # API KAOW
+  kaow-api:
+    build:
+      context: ./KAOW
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres-db;Port=5432;Database=kaowdb;Username=kaowuser;Password=kaowpassword
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres-db
+
+  # PostgreSQL Database
+  postgres-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: kaowuser
+      POSTGRES_PASSWORD: kaowpassword
+      POSTGRES_DB: kaowdb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres-data:
