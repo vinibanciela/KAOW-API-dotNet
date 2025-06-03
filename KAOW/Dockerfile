@@ -17,7 +17,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copiar arquivos do projeto para o container
+# Copiar arquivos do projeto para o container e restaurar dependências
 COPY ["KAOW.csproj", "./"]
 RUN dotnet restore "KAOW.csproj"
 
@@ -33,14 +33,13 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "KAOW.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Etapa final com SDK (para permitir EF migrations e comandos)
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
+FROM build AS final
 WORKDIR /app
 
-# Copiar a aplicação publicada
-COPY --from=publish /app/publish .
+# Copiar toda a pasta do projeto para garantir que o dotnet ef funcione (inclui código-fonte e ferramentas locais)
+COPY . .
 
-# Copiar dotnet-tools.json e restore das ferramentas locais para usar dotnet ef
-COPY .config/dotnet-tools.json .config/dotnet-tools.json
+# Restaurar ferramentas locais, incluindo dotnet-ef
 RUN dotnet tool restore
 
 # Comando de entrada padrão
