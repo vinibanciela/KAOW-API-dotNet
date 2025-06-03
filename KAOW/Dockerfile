@@ -39,5 +39,9 @@ WORKDIR /app
 # Copiar a aplicação publicada
 COPY --from=publish /app/publish .
 
+# Copiar dotnet-tools.json e restore das ferramentas locais para usar dotnet ef
+COPY KAOW/.config/dotnet-tools.json ./.config/dotnet-tools.json
+RUN dotnet tool restore
+
 # Comando de entrada padrão
 ENTRYPOINT ["dotnet", "KAOW.dll"]
