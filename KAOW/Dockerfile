@@ -32,14 +32,17 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "KAOW.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Etapa final com SDK (para permitir EF migrations e comandos)
-FROM build AS final
+# Etapa final com SDK (para EF e execução do app)
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
 WORKDIR /app
 
-# Copiar toda a pasta do projeto para garantir que o dotnet ef funcione (inclui código-fonte e ferramentas locais)
-COPY . .
+# Copiar a aplicação publicada para /app
+COPY --from=publish /app/publish .
 
-# Restaurar ferramentas locais, incluindo dotnet-ef
+# Copiar a pasta .config e dotnet-tools.json para restaurar o dotnet-ef
+COPY .config/dotnet-tools.json .config/dotnet-tools.json
+
+# Restaurar ferramentas locais (dotnet-ef)
 RUN dotnet tool restore
 
 # Comando de entrada padrão
