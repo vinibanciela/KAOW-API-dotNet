@@ -1,6 +1,9 @@
 using KAOW.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using KAOW.Services;
+using KAOW.DTOs; // (caso utilizar DTOs diretamente aqui no futuro)
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +13,12 @@ builder.Services.AddDbContext<CrisisDbContext>(options =>
 
 // Adiciona suporte a controllers e API REST
 builder.Services.AddControllers();
+
+// Injeção de dependência para os serviços (camada de lógica de negócio)
+builder.Services.AddScoped<InstituicaoService>();
+builder.Services.AddScoped<EventoExtremoService>();
+builder.Services.AddScoped<BaseEmergenciaService>();
+builder.Services.AddScoped<EventoInstituicaoService>();
 
 // Adiciona serviços para documentação da API (Swagger/OpenAPI)
 builder.Services.AddEndpointsApiExplorer(); // Necessário para habilitar Swagger em APIs
