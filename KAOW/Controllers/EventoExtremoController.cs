@@ -1,64 +1,105 @@
+using KAOW.DTOs;
+using KAOW.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using KAOW.Data;
-using KAOW.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace KAOW.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")] // Rota base: api/EventoExtremo
+    [Route("api/[controller]")]
+    [Produces("application/json")]
     public class EventoExtremoController : ControllerBase
     {
-        private readonly CrisisDbContext _context;
+        private readonly EventoExtremoService _service;
 
-        public EventoExtremoController(CrisisDbContext context)
+        public EventoExtremoController(EventoExtremoService service)
         {
-            _context = context;
+            _service = service;
         }
 
-        // GET: api/EventoExtremo
+        /// <summary>
+        /// Lista todos os eventos extremos registrados (GET simples).
+        /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<EventoExtremo>>> GetAll()
+        [SwaggerOperation(
+            Summary = "Listar eventos extremos",
+            Description = "Retorna uma lista de todos os eventos extremos cadastrados, sem incluir relacionamentos."
+        )]
+        [ProducesResponseType(typeof(IEnumerable<EventoExtremoDTO>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<EventoExtremoDTO>>> GetAll()
         {
-            return await _context.EventosExtremos.ToListAsync();
+            var eventos = await _service.GetAllAsync();
+            return Ok(eventos);
         }
 
-        // GET: api/EventoExtremo/{id}
+        /// <summary>
+        /// Retorna os detalhes de um evento extremo pelo ID (GET detalhado).
+        /// </summary>
         [HttpGet("{id}")]
-        public async Task<ActionResult<EventoExtremo>> GetById(int id)
+        [SwaggerOperation(
+            Summary = "Buscar evento extremo por ID",
+            Description = "Retorna os dados detalhados do evento extremo, incluindo instituições e bases relacionadas."
+        )]
+        [ProducesResponseType(typeof(EventoExtremoDetailDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<EventoExtremoDetailDTO>> GetById(int id)
         {
-            var evento = await _context.EventosExtremos.FindAsync(id);
+            var evento = await _service.GetDetailByIdAsync(id);
             if (evento == null) return NotFound();
-            return evento;
+            return Ok(evento);
         }
 
-        // POST: api/EventoExtremo
+        /// <summary>
+        /// Cria um novo evento extremo (POST).
+        /// </summary>
         [HttpPost]
-        public async Task<ActionResult<EventoExtremo>> Create(EventoExtremo evento)
+        [SwaggerOperation(
+            Summary = "Criar novo evento extremo",
+            Description = "Adiciona um novo evento extremo com os dados fornecidos."
+        )]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> Create(CreateEventoExtremoDTO dto)
         {
-            _context.EventosExtremos.Add(evento);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = evento.Id }, evento);
+            var created = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
-        // PUT: api/EventoExtremo/{id}
+        /// <summary>
+        /// Atualiza um evento extremo existente (PUT).
+        /// </summary>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, EventoExtremo evento)
+        [SwaggerOperation(
+            Summary = "Atualizar evento extremo",
+            Description = "Atualiza os dados do evento extremo com base no ID fornecido."
+        )]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> Update(int id, UpdateEventoExtremoDTO dto)
         {
-            if (id != evento.Id) return BadRequest();
-            _context.Entry(evento).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            if (id != dto.Id) return BadRequest("ID da URL não corresponde ao corpo da requisição.");
+
+            var updated = await _service.UpdateAsync(dto);
+            if (updated == null) return NotFound();
+
             return NoContent();
         }
 
-        // DELETE: api/EventoExtremo/{id}
+        /// <summary>
+        /// Remove um evento extremo (DELETE).
+        /// </summary>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [SwaggerOperation(
+            Summary = "Excluir evento extremo",
+            Description = "Remove um evento extremo com base no ID fornecido."
+        )]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> Delete(int id)
         {
-            var evento = await _context.EventosExtremos.FindAsync(id);
-            if (evento == null) return NotFound();
-            _context.EventosExtremos.Remove(evento);
-            await _context.SaveChangesAsync();
+            var deleted = await _service.DeleteAsync(id);
+            if (!deleted) return NotFound();
             return NoContent();
         }
     }

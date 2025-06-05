@@ -1,65 +1,105 @@
+using KAOW.DTOs;
+using KAOW.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using KAOW.Data;
-using KAOW.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace KAOW.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")] // Define a rota base como "api/Instituicao"
+    [Route("api/[controller]")]
+    [Produces("application/json")]
     public class InstituicaoController : ControllerBase
     {
-        private readonly CrisisDbContext _context;
+        private readonly InstituicaoService _service;
 
-        // Injeção do DbContext via construtor
-        public InstituicaoController(CrisisDbContext context)
+        public InstituicaoController(InstituicaoService service)
         {
-            _context = context;
+            _service = service;
         }
 
-        // GET: api/Instituicao
+        /// <summary>
+        /// Lista todas as instituições cadastradas (GET simples).
+        /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Instituicao>>> GetAll()
+        [SwaggerOperation(
+            Summary = "Listar instituições",
+            Description = "Retorna uma lista de todas as instituições cadastradas no sistema, sem incluir relacionamentos."
+        )]
+        [ProducesResponseType(typeof(IEnumerable<InstituicaoDTO>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<InstituicaoDTO>>> GetAll()
         {
-            return await _context.Instituicoes.ToListAsync();
+            var instituicoes = await _service.GetAllAsync();
+            return Ok(instituicoes);
         }
 
-        // GET: api/Instituicao/{id}
+        /// <summary>
+        /// Retorna os detalhes de uma instituição pelo ID (GET detalhado).
+        /// </summary>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Instituicao>> GetById(int id)
+        [SwaggerOperation(
+            Summary = "Buscar instituição por ID",
+            Description = "Retorna os dados detalhados da instituição, incluindo relacionamentos com bases de emergência e eventos extremos."
+        )]
+        [ProducesResponseType(typeof(InstituicaoDetailDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<InstituicaoDetailDTO>> GetById(int id)
         {
-            var instituicao = await _context.Instituicoes.FindAsync(id);
+            var instituicao = await _service.GetDetailByIdAsync(id);
             if (instituicao == null) return NotFound();
-            return instituicao;
+            return Ok(instituicao);
         }
 
-        // POST: api/Instituicao
+        /// <summary>
+        /// Cria uma nova instituição (POST).
+        /// </summary>
         [HttpPost]
-        public async Task<ActionResult<Instituicao>> Create(Instituicao instituicao)
+        [SwaggerOperation(
+            Summary = "Criar nova instituição",
+            Description = "Adiciona uma nova instituição no sistema com os dados fornecidos."
+        )]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> Create(CreateInstituicaoDTO dto)
         {
-            _context.Instituicoes.Add(instituicao);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = instituicao.Id }, instituicao);
+            var created = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
-        // PUT: api/Instituicao/{id}
+        /// <summary>
+        /// Atualiza uma instituição existente (PUT).
+        /// </summary>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Instituicao instituicao)
+        [SwaggerOperation(
+            Summary = "Atualizar instituição",
+            Description = "Atualiza os dados da instituição com base no ID fornecido."
+        )]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> Update(int id, UpdateInstituicaoDTO dto)
         {
-            if (id != instituicao.Id) return BadRequest();
-            _context.Entry(instituicao).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            if (id != dto.Id) return BadRequest("ID da URL não corresponde ao corpo da requisição.");
+
+            var updated = await _service.UpdateAsync(dto);
+            if (updated == null) return NotFound();
+
             return NoContent();
         }
 
-        // DELETE: api/Instituicao/{id}
+        /// <summary>
+        /// Remove uma instituição existente (DELETE).
+        /// </summary>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [SwaggerOperation(
+            Summary = "Excluir instituição",
+            Description = "Remove uma instituição do sistema com base no ID fornecido."
+        )]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> Delete(int id)
         {
-            var instituicao = await _context.Instituicoes.FindAsync(id);
-            if (instituicao == null) return NotFound();
-            _context.Instituicoes.Remove(instituicao);
-            await _context.SaveChangesAsync();
+            var deleted = await _service.DeleteAsync(id);
+            if (!deleted) return NotFound();
             return NoContent();
         }
     }
