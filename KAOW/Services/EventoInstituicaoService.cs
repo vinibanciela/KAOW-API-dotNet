@@ -74,8 +74,8 @@ namespace KAOW.Services
             await _context.SaveChangesAsync();
             return true;
         }
-
-        // Lista os nomes das instituições vinculadas a um evento extremo
+        /*
+        // Lista os nomes das instituições vinculadas a um evento extremo (DESATIVADA - pois já temos GET DETAILS)
         public async Task<List<string>> ListarInstituicoesPorEventoAsync(int eventoId)
         {
             return await _context.EventoInstituicoes
@@ -84,7 +84,7 @@ namespace KAOW.Services
                 .ToListAsync();
         }
 
-        // Lista os tipos dos eventos extremos vinculados a uma instituição
+        // Lista os tipos dos eventos extremos vinculados a uma instituição (DESATIVADA - pois já temos GET DETAILS)
         public async Task<List<string>> ListarEventosPorInstituicaoAsync(int instituicaoId)
         {
             return await _context.EventoInstituicoes
@@ -92,5 +92,6 @@ namespace KAOW.Services
                 .Select(ei => ei.EventoExtremo.Tipo)
                 .ToListAsync();
         }
+        */
     }
 }
