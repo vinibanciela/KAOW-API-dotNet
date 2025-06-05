@@ -1,11 +1,13 @@
-using Microsoft.AspNetCore.Mvc;
-using KAOW.Services;
 using KAOW.DTOs;
+using KAOW.Services;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace KAOW.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Produces("application/json")]
     public class EventoInstituicaoController : ControllerBase
     {
         private readonly EventoInstituicaoService _service;
@@ -15,38 +17,64 @@ namespace KAOW.Controllers
             _service = service;
         }
 
-        // POST: api/EventoInstituicao → Cria vínculo
+        /// <summary>
+        /// Lista todos os relacionamentos entre eventos extremos e instituições (GET simples).
+        /// </summary>
+        [HttpGet]
+        [SwaggerOperation(Summary = "Listar todos os vínculos", Description = "Retorna todos os vínculos EventoExtremo-Instituicao cadastrados")]
+        [ProducesResponseType(typeof(IEnumerable<EventoInstituicaoDTO>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<EventoInstituicaoDTO>>> GetAll()
+        {
+            var lista = await _service.GetAllAsync();
+            return Ok(lista);
+        }
+
+        /// <summary>
+        /// Retorna um vínculo específico por ID composto (GET específico).
+        /// </summary>
+        [HttpGet("evento/{eventoId}/instituicao/{instituicaoId}")]
+        [SwaggerOperation(Summary = "Buscar vínculo específico", Description = "Busca o vínculo entre um EventoExtremo e uma Instituição pelo ID de ambos")]
+        [ProducesResponseType(typeof(EventoInstituicaoDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<EventoInstituicaoDTO>> GetByIds(int eventoId, int instituicaoId)
+        {
+            var item = await _service.GetByIdsAsync(eventoId, instituicaoId);
+            if (item == null) return NotFound();
+            return Ok(item);
+        }
+
+        /// <summary>
+        /// Cria um novo vínculo entre evento extremo e instituição (POST).
+        /// </summary>
         [HttpPost]
-        public async Task<IActionResult> Vincular([FromBody] EventoInstituicaoDTO dto)
+        [SwaggerOperation(Summary = "Criar vínculo", Description = "Cria um novo vínculo entre EventoExtremo e Instituição")]
+        [ProducesResponseType(typeof(EventoInstituicaoDTO), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<EventoInstituicaoDTO>> Create(EventoInstituicaoDTO dto)
         {
-            var sucesso = await _service.VincularAsync(dto);
-            if (!sucesso) return Conflict("Vínculo já existente.");
-            return Ok("Vínculo criado com sucesso.");
+            try
+            {
+                var criado = await _service.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetByIds), new { eventoId = criado.EventoExtremoId, instituicaoId = criado.InstituicaoId }, criado);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        // DELETE: api/EventoInstituicao → Remove vínculo
-        [HttpDelete]
-        public async Task<IActionResult> Desvincular([FromBody] EventoInstituicaoDTO dto)
+        /// <summary>
+        /// Remove um vínculo existente entre evento extremo e instituição (DELETE).
+        /// </summary>
+        [HttpDelete("evento/{eventoId}/instituicao/{instituicaoId}")]
+        [SwaggerOperation(Summary = "Excluir vínculo", Description = "Remove um vínculo específico entre EventoExtremo e Instituição")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete(int eventoId, int instituicaoId)
         {
-            var sucesso = await _service.DesvincularAsync(dto);
-            if (!sucesso) return NotFound("Vínculo não encontrado.");
-            return Ok("Vínculo removido com sucesso.");
-        }
-        
-        // GET: api/EventoInstituicao/evento/{eventoId}
-        [HttpGet("evento/{eventoId}")]
-        public async Task<IActionResult> GetInstituicoesPorEvento(int eventoId)
-        {
-            var instituicoes = await _service.ListarInstituicoesPorEventoAsync(eventoId);
-            return Ok(instituicoes);
-        }
-
-        // GET: api/EventoInstituicao/instituicao/{instituicaoId}
-        [HttpGet("instituicao/{instituicaoId}")]
-        public async Task<IActionResult> GetEventosPorInstituicao(int instituicaoId)
-        {
-            var eventos = await _service.ListarEventosPorInstituicaoAsync(instituicaoId);
-            return Ok(eventos);
+            var removido = await _service.DeleteAsync(eventoId, instituicaoId);
+            if (!removido) return NotFound();
+            return NoContent();
         }
     }
 }

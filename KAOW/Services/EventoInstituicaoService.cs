@@ -14,13 +14,41 @@ namespace KAOW.Services
             _context = context;
         }
 
-        // Cria o vínculo entre EventoExtremo e Instituicao
-        public async Task<bool> VincularAsync(EventoInstituicaoDTO dto)
+        // Retorna todos os vínculos entre EventoExtremo e Instituicao (GET simples)
+        public async Task<List<EventoInstituicaoDTO>> GetAllAsync()
+        {
+            return await _context.EventoInstituicoes
+                .Select(ei => new EventoInstituicaoDTO
+                {
+                    EventoExtremoId = ei.EventoExtremoId,
+                    InstituicaoId = ei.InstituicaoId
+                })
+                .ToListAsync();
+        }
+
+        // Retorna um vínculo específico entre EventoExtremo e Instituicao (Get específico)
+        public async Task<EventoInstituicaoDTO?> GetByIdsAsync(int eventoId, int instituicaoId)
+        {
+            var vinculo = await _context.EventoInstituicoes
+                .FirstOrDefaultAsync(ei => ei.EventoExtremoId == eventoId && ei.InstituicaoId == instituicaoId);
+
+            if (vinculo == null) return null;
+
+            return new EventoInstituicaoDTO
+            {
+                EventoExtremoId = vinculo.EventoExtremoId,
+                InstituicaoId = vinculo.InstituicaoId
+            };
+        }
+
+        // Cria o vínculo entre EventoExtremo e Instituicao (POST)
+        public async Task<EventoInstituicaoDTO> CreateAsync(EventoInstituicaoDTO dto)
         {
             var existe = await _context.EventoInstituicoes
                 .AnyAsync(ei => ei.EventoExtremoId == dto.EventoExtremoId && ei.InstituicaoId == dto.InstituicaoId);
 
-            if (existe) return false;
+            if (existe)
+                throw new InvalidOperationException("Vínculo já existente.");
 
             var vinculo = new EventoInstituicao
             {
@@ -30,14 +58,15 @@ namespace KAOW.Services
 
             _context.EventoInstituicoes.Add(vinculo);
             await _context.SaveChangesAsync();
-            return true;
+
+            return dto;
         }
 
-        // Remove o vínculo entre EventoExtremo e Instituicao
-        public async Task<bool> DesvincularAsync(EventoInstituicaoDTO dto)
+        // Remove o vínculo entre EventoExtremo e Instituicao (DELETE)
+        public async Task<bool> DeleteAsync(int eventoId, int instituicaoId)
         {
             var vinculo = await _context.EventoInstituicoes
-                .FirstOrDefaultAsync(ei => ei.EventoExtremoId == dto.EventoExtremoId && ei.InstituicaoId == dto.InstituicaoId);
+                .FirstOrDefaultAsync(ei => ei.EventoExtremoId == eventoId && ei.InstituicaoId == instituicaoId);
 
             if (vinculo == null) return false;
 
@@ -45,7 +74,7 @@ namespace KAOW.Services
             await _context.SaveChangesAsync();
             return true;
         }
-        
+
         // Lista os nomes das instituições vinculadas a um evento extremo
         public async Task<List<string>> ListarInstituicoesPorEventoAsync(int eventoId)
         {
