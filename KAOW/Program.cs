@@ -57,5 +57,12 @@ app.UseAuthorization();
 // Mapeia os controllers e endpoints da API
 app.MapControllers();
 
+// Aplicar migrations automaticamente ao iniciar o app
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<CrisisDbContext>();
+    context.Database.Migrate(); // Aplica todas as migrations pendentes
+}
+
 // Inicia a aplicação
 app.Run();
