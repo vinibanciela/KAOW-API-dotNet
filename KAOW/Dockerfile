@@ -3,6 +3,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 
 # Criar usuário sem privilégios administrativos
+# Esta instrução será herdada pela etapa 'final'
 RUN useradd -ms /bin/bash kaowuser
 USER kaowuser
 
@@ -31,7 +32,8 @@ RUN dotnet build "KAOW.csproj" -c $BUILD_CONFIGURATION -o /app/build
 RUN dotnet publish "KAOW.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Etapa final (Runtime puro, sem SDK, apenas para execução da aplicação)
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# Use 'base' como a imagem base
+FROM base AS final
 WORKDIR /app
 
 # 5) Copiar somente a saída de publish - aplicação publicada - para o container final
