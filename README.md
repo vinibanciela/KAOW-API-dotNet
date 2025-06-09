@@ -1,5 +1,5 @@
 # Faculdade de Informática e Administração Paulista - FIAP/SP  
-**Referência:** Global Solution - 2025/1º Semestre  
+**Referência:** Global Solution - 2025/1º Semestre  - [EVENTOS EXTREMOS]
 
 **Alunos:**  
 - Guilherme Gonçalves - RM558475  
@@ -34,7 +34,7 @@ C#, .NET 8, ASP.NET Core, Entity Framework Core, PostgreSQL, Docker, Docker Comp
 
 O projeto KAOW API nasce no contexto da Global Solution do 1º Semestre de 2025, com o objetivo primordial de oferecer uma solução robusta e flexível para o mapeamento e gestão de recursos e atores envolvidos em cenários de emergência e desastres. Inspirados pela necessidade de agilidade e precisão na resposta a crises, esta API foi concebida para integrar e organizar informações cruciais de Instituições, Eventos Extremos e Bases de Emergência.
 
-Adotando uma abordagem modular e utilizando tecnologias modernas como C#, o framework ASP.NET Core e o banco de dados PostgreSQL, a API foi desenhada para ser escalável e de fácil manutenção. Um dos pilares do design da KAOW API é a opcionalidade dos relacionamentos entre as entidades. Isso significa que, por exemplo, uma Base de Emergência pode ser cadastrada sem estar imediatamente vinculada a uma Instituição ou a um Evento Extremo específico, permitindo que os dados sejam inseridos de forma incremental e adaptável à fluidez das situações de campo.
+Adotando uma abordagem modular e utilizando tecnologias modernas como C#, o framework ASP.NET Core e o banco de dados PostgreSQL, a API foi desenhada para ser escalável e de fácil manutenção. Um dos pilares do design da KAOW API é a opcionalidade dos relacionamentos entre as entidades. Isso significa que, por exemplo, um Evento Extremo pode ser cadastrado sem estar imediatamente vinculado a uma Instituição ou a uma Base de Emergência específica (o que é válido para as 3 entidades), permitindo que os dados sejam inseridos de forma incremental e adaptável à fluidez das situações de campo.
 
 A API implementa 6 tipos distintos de relacionamentos opcionais que, combinados com as 3 entidades principais (Instituição, Evento Extremo e Base de Emergência), formam um total de 12 cenários de relacionamento abrangentes. Estes cenários garantem a flexibilidade necessária para modelar diversas situações de emergência no mundo real:
 
@@ -152,7 +152,7 @@ Pressione `Ctrl+C` para sair do acompanhamento de logs.
 
 ### 📘 Documentação Interativa
 
-Disponível em:  
+Disponível em (se der erro ao clicar, copie e cole o link, e atualize a aba):  
 🔗 [http://4.201.169.45:8080/swagger/index.html](http://4.201.169.45:8080/swagger/index.html)
 
 ---
@@ -227,19 +227,6 @@ Para demonstrar os 12 cenários de relacionamentos e a funcionalidade completa d
 
 ---
 
-### ✅ Recomendações para testes completos:
-
-1. Verifique se os containers da API e do banco estão rodando:
-```bash
-docker-compose up -d
-```
-
-2. Use Swagger ou Postman para enviar as requisições.
-
-3. Após cada POST, **anote o ID** retornado (os PUTs e POSTs de vínculo dependem disso).
-
----
-
 📌 **Dúvidas, bugs ou sugestões:** use o sistema de issues do GitHub no repositório  
 📁 Repositório: [https://github.com/vinibanciela/KAOW-API-dotNet](https://github.com/vinibanciela/KAOW-API-dotNet)
 
@@ -247,9 +234,9 @@ docker-compose up -d
 
 ### ⚠️ Observação Importante:
 
-Todos os exemplos JSON abaixo foram testados e documentados em vídeo, validando a funcionalidade da API. No entanto, como o repositório é público e o link da API com o Swagger pode ser utilizado por diversos usuários (incluindo os professores avaliadores), é crucial que, ao realizar os testes, o ambiente seja limpo e reiniciado.
+Todos os exemplos JSON abaixo foram testados e documentados em vídeo, validando a funcionalidade da API. No entanto, como o repositório é público e o link da API com o Swagger pode ser utilizado por diversos usuários (incluindo os professores avaliadores), é crucial que, após realizar os testes, o ambiente seja limpo e reiniciado.
 
-Se um professor testar e a base de dados já contiver registros anteriores, a sequência dos IDs pode ser afetada. Para garantir que os exemplos funcionem conforme o esperado, especialmente os POSTs de relacionamento e os PUTs que dependem de IDs específicos, a base de dados deve estar limpa.
+Se um professor testar e a base de dados já contiver registros anteriores, a sequência dos IDs pode ser afetada. Para garantir que os exemplos funcionem conforme o esperado, especialmente os POSTs de relacionamento e os PUTs que dependem de IDs específicos (os demais POST´s poderiam funcionar), a base de dados deve estar limpa.
 
 ### 🔄 Resetar o Banco para testes limpos:
 
@@ -290,7 +277,7 @@ Os JSONs e requisições completas estão estruturadas na ordem:
 - **Cenários 5 a 8**: Evento Extremo  
 - **Cenários 9 a 12**: Base de Emergência  
 
-Para visualizar os exemplos JSON de cada cenário com endpoints e ID esperados, acesse a continuação do documento original (README local), pois eles estão todos detalhados e organizados.
+Para visualizar os exemplos JSON de cada cenário com endpoints e ID esperados, acesse a continuação do documento original (README), pois eles estão todos detalhados e organizados.
 
 > Todos os exemplos foram testados e validados. É recomendado resetar o banco antes para que os IDs retornem a partir de 1.
 
