@@ -105,6 +105,10 @@ Este guia assume que você possui as ferramentas básicas de desenvolvimento Doc
 
 ```bash
 git clone https://github.com/vinibanciela/KAOW-API-dotNet.git
+```
+## Acesse a pasta
+
+```bash
 cd KAOW-API-dotNet
 ```
 
@@ -247,21 +251,30 @@ Todos os exemplos JSON abaixo foram testados e documentados em vídeo, validando
 
 Se um professor testar e a base de dados já contiver registros anteriores, a sequência dos IDs pode ser afetada. Para garantir que os exemplos funcionem conforme o esperado, especialmente os POSTs de relacionamento e os PUTs que dependem de IDs específicos, a base de dados deve estar limpa.
 
-### 🔁 Resetar o Banco para testes limpos:
+### 🔄 Resetar o Banco para testes limpos:
 
 ```bash
+# 1. Conecte-se via SSH:
 ssh kaowadmin@4.201.169.45
 # senha: SenhaForteAqui123!
 
+# 2. Acesse o diretório do projeto:
 cd KAOW-API-dotNet
 
+# 3. Pare todos os containers em execução:
 docker stop $(docker ps -q)
+
+# 4. Remova todos os containers:
 docker rm $(docker ps -aq)
+
+# 5. Remova o volume do banco de dados:
 docker volume rm kaow-api-dotnet_postgres-data
 
+# 6. Verifique se containers e volumes foram removidos:
 docker ps
 docker volume ls
 
+# 7. Suba novamente os containers e reconstrua:
 docker compose up -d --build
 ```
 
