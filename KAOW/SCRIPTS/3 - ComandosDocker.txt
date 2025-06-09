@@ -1,0 +1,41 @@
+# Estes comandos devem ser executados DENTRO da pasta 'KAOW-API-dotNet' na VM.
+
+# 3.1. - Construir Imagem e Containers
+# Constrói as imagens Docker e inicia os containers da API e do banco de dados em modo detached.
+docker compose up -d --build
+
+# 3.2. - Listar containers
+# Lista todos os containers Docker em execução (e parados, se usar -a).
+docker ps
+
+# 3.3. - Listar a Network Docker
+# Lista todas as redes Docker. Você verá uma rede criada pelo docker-compose.
+docker network ls
+
+# 3.4. - Listar os Volumes do Banco no Docker
+# Lista os volumes Docker. Você verá o volume de dados do PostgreSQL.
+docker volume ls
+
+# 3.5. - Exibir os LOGs
+# Exibe os logs do container do banco de dados PostgreSQL.
+docker logs kaow-postgres-db
+# Exibe os logs do container da API.
+docker logs kaow-api
+# Exibe os logs de todos os serviços definidos no docker-compose.yml em tempo real.
+docker compose logs -f
+
+# 3.6. - Entrar no container da API e listar arquivos e permissões
+# Entra no shell bash do container da API para inspeção.
+# Pressione Ctrl+D ou digite 'exit' para sair do container.
+docker exec -it kaow-api bash
+# Dentro do container, liste os arquivos e permissões no diretório atual.
+ls -la
+
+# 3.7. - Entrar no container de Banco e verificar as tabelas
+# Entra no cliente psql dentro do container do banco de dados.
+# A senha do usuário 'kaowuser' para o banco 'kaowdb' será solicitada (verifique seu .env ou docker-compose.yml).
+# No seu docker-compose.yml atual (do README), a senha padrão seria 'Password123!'.
+docker exec -it kaow-postgres-db psql -U kaowuser -d kaowdb
+# Uma vez no prompt do psql, use '\dt' para listar as tabelas.
+\dt
+# Pressione '\q' e Enter para sair do psql, e depois 'exit' para sair do container.

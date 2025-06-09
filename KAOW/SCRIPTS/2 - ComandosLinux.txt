@@ -1,0 +1,36 @@
+# Estes comandos devem ser executados DENTRO da VM Linux após o login SSH.
+
+# 2.1. - Instalação do Docker Engine na VM
+# Atualiza os pacotes e instala o Docker Engine e o Docker Compose.
+sudo apt update
+sudo apt install ca-certificates curl gnupg -y
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+
+# Adiciona o usuário atual (kaowadmin) ao grupo docker para executar comandos docker sem sudo.
+sudo usermod -aG docker kaowadmin
+# Após este comando, você precisará sair e entrar novamente na VM para que a mudança de grupo tenha efeito.
+# Ou execute 'newgrp docker' para aplicar a mudança na sessão atual.
+
+# 2.2. - Instalação do GIT na VM
+# Instala o Git na VM.
+sudo apt install git -y
+
+# 2.3. - Mostrar versão do Docker e GIT
+# Verifica as versões instaladas do Git e Docker para confirmar a instalação.
+git --version && docker --version
+
+# 2.4. - Clonar Repositório
+# Clona o repositório do projeto para a VM.
+git clone https://github.com/vinibanciela/KAOW-API-dotNet.git
+
+# 2.5. - Abrir pasta do Projeto
+# Navega para o diretório do projeto.
+cd KAOW-API-dotNet

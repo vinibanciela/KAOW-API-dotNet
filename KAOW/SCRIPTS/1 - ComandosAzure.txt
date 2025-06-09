@@ -1,0 +1,82 @@
+# 1.1. - Login Azure
+# Autentica no Azure CLI. Uma janela do navegador será aberta para login.
+az login
+
+# 2.1. - Criação Grupo de Recursos
+# Cria um grupo de recursos no Azure para organizar todos os recursos da VM.
+az group create \
+  --name KaowResourceGroup \
+  --location brazilsouth
+
+# 3.1. - Criação VM
+# Cria uma máquina virtual Ubuntu 22.04 LTS com as especificações fornecidas.
+az vm create \
+  --resource-group KaowResourceGroup \
+  --name KaowVM \
+  --image Ubuntu2204 \
+  --admin-username kaowadmin \
+  --admin-password SenhaForteAqui123! \
+  --size Standard_B1s \
+  --authentication-type password \
+  --location brazilsouth \
+  --public-ip-sku Standard # Usar SKU Standard para IPs públicos é uma boa prática para VMs de produção.
+
+# 4.1. - Abertura Porta 22 (SSH)
+# Abre a porta 22 para acesso SSH à VM.
+az network nsg rule create \
+  --resource-group KaowResourceGroup \
+  --nsg-name KaowVMNSG \
+  --name open-port-22 \
+  --priority 900 \
+  --direction Inbound \
+  --access Allow \
+  --protocol Tcp \
+  --source-address-prefix '*' \
+  --source-port-range '*' \
+  --destination-address-prefix '*' \
+  --destination-port-range 22
+
+# 5.1. - Abertura Porta 8080 (Aplicação KAOW API)
+# Abre a porta 8080 para acesso à aplicação KAOW API.
+az network nsg rule create \
+  --resource-group KaowResourceGroup \
+  --nsg-name KaowVMNSG \
+  --name open-port-8080 \
+  --priority 901 \
+  --direction Inbound \
+  --access Allow \
+  --protocol Tcp \
+  --source-address-prefix '*' \
+  --source-port-range '*' \
+  --destination-address-prefix '*' \
+  --destination-port-range 8080
+
+# 6.1. - Abertura Porta 5432 (PostgreSQL)
+# Abre a porta 5432 para acesso ao PostgreSQL.
+# ATENÇÃO: Em ambiente de produção, não é recomendado abrir a porta do DB para o mundo ('*').
+# Isso é para fins de teste/demonstração. Em produção, restrinja o Source Address Prefix.
+az network nsg rule create \
+  --resource-group KaowResourceGroup \
+  --nsg-name KaowVMNSG \
+  --name open-port-5432 \
+  --priority 902 \
+  --direction Inbound \
+  --access Allow \
+  --protocol Tcp \
+  --source-address-prefix '*' \
+  --source-port-range '*' \
+  --destination-address-prefix '*' \
+  --destination-port-range 5432
+
+# 7. - Verificar Portas Abertas
+# Lista todas as regras de segurança de rede aplicadas à NSG da VM.
+az network nsg rule list \
+  --resource-group KaowResourceGroup \
+  --nsg-name KaowVMNSG \
+  --output table
+
+# 8. - Entrar na VM
+# Comando SSH para conectar-se à VM. Substitua o IP pelo IP público da sua VM.
+# A senha é 'SenhaForteAqui123!'.
+ssh kaowadmin@4.201.169.45
+# password: SenhaForteAqui123!
